@@ -14,7 +14,7 @@ end
 function love.load()
   local window_width = love.graphics.getWidth()
   local window_height = love.graphics.getHeight()
-  minor = 8
+  local minor = 8
   if love.getVersion ~= nil then
     _, minor, _, _ = love.getVersion()
   end
@@ -23,6 +23,11 @@ function love.load()
   else
     love.graphics.setMode(window_width, window_height, true, true, 2)
   end
+  if minor > 8 then
+    LOVE_VERSION_IS_OLD = false
+  else
+    LOVE_VERSION_IS_OLD = true
+  end  
   for _, func in pairs(events.loading) do
     func()
   end
@@ -56,8 +61,8 @@ function draw_objects(ct)
       local offx = offset_x(obj.image)
       local offy = offset_y(obj.image)
       love.graphics.draw(obj.image, 
-        obj.x + offx - world.camera.x,
-        obj.y + offy - world.camera.y,
+        obj.x  - world.camera.x,
+        obj.y  - world.camera.y,
         obj.angle + math.pi / 2, 1, 1, offx, offy)
     end
   end
@@ -65,29 +70,23 @@ end
 
 function love.mousepressed( x, y, mb )
   if mb == "wu" then
-    world.scale = world.scale + 0.2
+    world.scale = world.scale + 0.05
   elseif mb == "wd" then
-    world.scale = world.scale - 0.2
+    world.scale = world.scale - 0.05
   else
     return
   end
   if world.scale > 1.4 then 
     world.scale = 1.4
-  elseif world.scale < 0.6 then 
-    world.scale = 0.6
-  else
-      update_window_res()
+  elseif world.scale < 0.5 then 
+    world.scale = 0.5
   end
+  update_window_res()
 end
 
 function love.draw()
+  love.graphics.push()
   love.graphics.scale(world.scale)
-  --love.graphics.translate(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2)
-  love.graphics.print("FPS: "..tostring(love.timer.getFPS( )), 10, 10)
-  love.graphics.print("POS: "
-      ..tostring(math.floor(world.center.x / world.cell_width)).."x"
-      ..tostring(math.floor(world.center.y / world.cell_height)), 10, 25)
-  
   world.grid_map_curr_rect(
     function(_, cell, left, top)
       if cell ~= nil and cell.bg ~= nil then
@@ -101,5 +100,10 @@ function love.draw()
         draw_objects(cell.fg)
       end
     end, nil
-    )
+  )
+  love.graphics.pop()
+  love.graphics.print("FPS: "..tostring(love.timer.getFPS( )), 10, 10)
+  love.graphics.print("POS: "
+      ..tostring(math.floor(world.center.x / world.cell_width)).."x"
+      ..tostring(math.floor(world.center.y / world.cell_height)), 10, 25)
 end

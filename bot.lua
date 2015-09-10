@@ -20,6 +20,7 @@ function bot_api.new()
   bot.total_time = 0
   bot.flexway = 1
   bot.agresway = false
+  bot.objtype = OBJ_TYPE_BOT
     
     function bot:move_to(x, y)
       self.dst_pnt.x = x
@@ -69,15 +70,15 @@ function bot_api.new()
         local sx, sy = besizer(self.move_t + cstep, self.start_pnt.x, self.mid_pnt.x, self.dst_pnt.x)
         return lm.vecmod(lm.vecsub({x = sx, y = sy}, oldpos)) - self.speed * dt
       end
-      local function find_step(lstep, rstep)
+      local function find_step(lstep, rstep, it)
         local cstep = (lstep + rstep) / 2
         local dif = estimate_step(cstep)
-        if math.abs(dif) < self.speed * dt * 0.1 then
+        if it == 0 or math.abs(dif) < self.speed * dt * 0.1 then
           return cstep
         elseif dif > 0 then
-          return find_step(lstep, cstep)
+          return find_step(lstep, cstep, it - 1)
         else
-          return find_step(cstep, rstep)
+          return find_step(cstep, rstep, it - 1)
         end
       end
       if estimate_step(step) > 0 then
@@ -85,13 +86,13 @@ function bot_api.new()
         while estimate_step(lower) >= 0 do
           lower = lower / 2
         end
-        step = find_step(lower, step)
+        step = find_step(lower, step, 20)
       else
         local upper = step 
         while estimate_step(upper) <= 0 do
           upper = upper * 2
         end
-        step = find_step(step, upper)
+        step = find_step(step, upper, 20)
       end
       self.move_t = self.move_t + step
       if self.move_t > 1 then

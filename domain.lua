@@ -19,9 +19,9 @@ local function new_domain(i, j)
   local dm = 
   {
     x = i, y = j,
-    simple_enemies_count = math.random(10) - 1,
-    simple_enemies = {}
+    objects = {}
   }
+
   function dm:radius()
     return domain_rad * world.cell_width
   end
@@ -35,6 +35,25 @@ local function new_domain(i, j)
     return (self.x * domain_diam + domain_rad) * world.cell_width,
       (self.y * domain_diam + domain_rad) * world.cell_height
   end
+  
+  function dm:put(obj)
+      table.insert(self.objects, obj)  
+  end
+
+  function dm:rm(obj)
+    local num = nil
+    for j = 1, #self.objects do
+      if self.objects[j] == obj then
+        world.rm_fg(obj)
+        num = j
+        break
+      end
+    end
+    if num ~= nil then
+      table.remove(self.objects, num)
+    end
+  end
+  
   return dm
 end
 
@@ -44,15 +63,20 @@ local function check_domain(i, j)
     end
     if domain[i][j] == nil then
       domain[i][j] = new_domain(i, j)
+      for k = 1, #events.domain_creator do
+        ev = events.domain_creator[k]
+        ev[2].domain = domain[i][j]
+        ev[1](ev[2])
+      end
     end
 end
 
 local function domain_map_curr_rect(f, p)
   local left, top = domain_location(world.center.x, world.center.y)
-  local right = left + 1
-  local bottom = top + 1
-  left = left - 1
-  top = top - 1
+  local right = left + 2
+  local bottom = top + 2
+  left = left - 2
+  top = top - 2
 
   for i = left,right do
     for j= top,bottom do
@@ -63,23 +87,28 @@ local function domain_map_curr_rect(f, p)
 end
 
 local function domain_updater(dt, cell)
-  tocreate = cell.simple_enemies_count - #cell.simple_enemies
-  if tocreate > 0 then
-    for i = 1, tocreate do
-      local bot = enemy_api.new(cell)
-      table.insert(cell.simple_enemies, bot)  
-    end
-  end
-  for j = 1, #cell.simple_enemies do
-    local en = cell.simple_enemies[j]
+  local i, count = 1, #cell.objects
+  while i <= count do
+    local en = cell.objects[i]
     world.rm_fg(en)
-    en:update(cell, dt)
-    world.put_fg(en)
+    if not en:update(cell, dt) then
+      table.remove(cell.objects, i)
+      count = count - 1
+    else
+      i = i + 1
+      world.put_fg(en)
+    end
   end
 end
 
 function domain_api.update(par)
   domain_map_curr_rect(domain_updater, par.dt)
+end
+
+function domain_api.get_domain(x, y)
+  local dx, dy = domain_location(world.center.x, world.center.y)
+  check_domain(dx, dy)
+  return domain[dx][dy] 
 end
 
 return domain_api

@@ -1,10 +1,11 @@
 world = require "world" 
 hero = require "hero"
 domain = require "domain"
+enemy = require "enemy"
 
 local event_handlers = 
 {
-  loading = {hero.load, nil},
+  loading = {hero.load},
   subprocess = 
   {
     {function() return true  end, 
@@ -34,12 +35,26 @@ local event_handlers =
         {hero.update, {msg = "RotateRight"}}
       }
     },
+    {function() 
+        local key = "space" 
+        if LOVE_VERSION_IS_OLD then
+          key = " "
+        end
+        return love.keyboard.isDown(key) 
+        end, 
+      {
+        {hero.update, {msg = "Shoot"}}
+      }
+    },
     {function() return love.keyboard.isDown("escape") end,
       {
         {love.event.quit, {}}
       }
     },
-  }
+  },
+  domain_creator = { 
+    {enemy.domain_init, {}},
+    }
 }
 
 return event_handlers

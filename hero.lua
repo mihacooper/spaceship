@@ -1,14 +1,18 @@
+require "utils"
 world = require "world" 
 resources = require "resources/resources" 
+weapon = require "weapon"
+domainer = require "domain"
 
-local MAX_SPEED = 800
-local SPEED_STEP = 10
-local ANGLE_SPEED = math.pi / 2
+local MAX_SPEED = 1200
+local SPEED_STEP = 15
+local ANGLE_SPEED = math.pi 
 
 local hero = 
 {
 	x = 0, y = 0, angle = 0., image = nil,
-  speed = 0.,
+  speed = 0., objtype = OBJ_TYPE_HERO,
+  shoot_timer = new_timer(0.1)
 }
 
 local hero_events = {}
@@ -32,6 +36,14 @@ function hero_events.update(par)
 		hero.angle = hero.angle - ANGLE_SPEED * par.dt
   elseif par.msg == "RotateRight" then
 		hero.angle = hero.angle + ANGLE_SPEED * par.dt
+  elseif par.msg == "Shoot" then
+    if hero.shoot_timer:age(par.dt) then
+      local bull = weapon.shoot()
+      bull.x = hero.x
+      bull.y = hero.y
+      bull.angle = hero.angle
+      domainer.get_domain():put(bull)
+    end
   elseif par.msg == nil then
     world.rm_fg(hero)
     hero.x = hero.x + math.cos(hero.angle) * hero.speed * par.dt

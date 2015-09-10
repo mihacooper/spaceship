@@ -1,5 +1,5 @@
 function love.conf(t)
-  minor = 8
+  local minor = 8
   if love.getVersion ~= nil then
     _, minor, _, _ = love.getVersion()
   end
