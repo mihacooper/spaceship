@@ -35,13 +35,7 @@ local event_handlers =
         {hero.update, {msg = "RotateRight"}}
       }
     },
-    {function() 
-        local key = "space" 
-        if LOVE_VERSION_IS_OLD then
-          key = " "
-        end
-        return love.keyboard.isDown(key) 
-        end, 
+    {function() return love.keyboard.isDown(" ") end, 
       {
         {hero.update, {msg = "Shoot"}}
       }

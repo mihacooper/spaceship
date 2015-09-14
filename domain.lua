@@ -90,13 +90,13 @@ local function domain_updater(dt, cell)
   local i, count = 1, #cell.objects
   while i <= count do
     local en = cell.objects[i]
-    world.rm_fg(en)
+    world.rm(en, en.level)
     if not en:update(cell, dt) then
       table.remove(cell.objects, i)
       count = count - 1
     else
       i = i + 1
-      world.put_fg(en)
+      world.put(en, en.level)
     end
   end
 end

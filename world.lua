@@ -19,8 +19,8 @@ world.grid_width = math.floor((WINDOW_WIDTH + world.cell_width - 1) / world.cell
 world.grid_height = math.floor((WINDOW_HEIGHT + world.cell_height - 1) / world.cell_height)
 
 function world.grid_location(x, y)
-  return math.floor((x + world.cell_width - 1) / world.cell_width),
-    math.floor((y + world.cell_height - 1) / world.cell_height)
+  return math.floor(x / world.cell_width),
+    math.floor(y / world.cell_height)
 end
 
 local function check_cell(i, j)
@@ -29,10 +29,13 @@ local function check_cell(i, j)
     end
     if world.grid[i][j] == nil then
       world.grid[i][j] = {}
+      for lev = 1, DRAW_LAYERS do
+        world.grid[i][j][lev] = {}
+      end
     end
 end
 
-function world.grid_map_curr_rect(f, p)
+function world.grid_map_curr_rect(f, level, data)
   local left, top = world.grid_location(world.camera.x, world.camera.y)
   local right = left + world.grid_width 
   local bottom = top + world.grid_height
@@ -40,7 +43,7 @@ function world.grid_map_curr_rect(f, p)
   for i = left,right do
     for j= top,bottom do
       check_cell(i, j)
-      f(p, world.grid[i][j], i, j)
+      f(data, world.grid[i][j][level], i, j, level)
     end
   end
 end
@@ -50,7 +53,7 @@ local function newRandomStar(cx, cy, w, h)
   local sx = cx + math.random(w) - 1
   local sy = cy + math.random(h) - 1
   if t > 3 then
-    return {image = nil}
+    return nil
   elseif t == 1 then
     return {image = small_star, x = sx, y = sy, angle = 0}
   elseif t == 2 then
@@ -62,40 +65,38 @@ end
 
 function world.update(par)
   world.grid_map_curr_rect(
-    function(_, cell, left, top)
-      if cell.bg == nil then
-            cell.bg = {newRandomStar(left * world.cell_width, 
-              top * world.cell_height, world.cell_width, world.cell_height)}
-          end
-    end, {}
+    function(_, cell, left, top, _)
+      print(#cell)
+      if #cell == 0 then
+        local star = newRandomStar(left * world.cell_width, 
+            top * world.cell_height, world.cell_width, world.cell_height)
+        if star ~= nil then
+          world.put(star, DRAW_LAYER_BG)
+        end
+      end
+    end, DRAW_LAYER_BG, {}
     )
 end
 
-function world.put_fg(obj)
+function world.put(obj, level)
   local gx, gy = world.grid_location(obj.x, obj.y)
   check_cell(gx, gy)
-  local cell = world.grid[gx][gy]
-  local num = 1
-  if cell.fg ~= nil then
-    num = #cell.fg + 1
-  else
-    cell.fg = {}
+  local cell = world.grid[gx][gy][level]
+  if cell == nil then
+    cell = {}
   end
-  cell.fg[num] = obj
+  table.insert(cell, obj)
 end
 
-function world.rm_fg(obj)
+function world.rm(obj, level)
   local gx, gy = world.grid_location(obj.x, obj.y)
-  if world.grid[gx] == nil or world.grid[gx][gy] == nil then
+  if world.grid[gx] == nil or world.grid[gx][gy] == nil or world.grid[gx][gy][level] == nil then
     return
   end
-  local cell = world.grid[gx][gy]
-  if cell == nil or cell.fg == nil then
-    return
-  end
-  for i = 1, #cell.fg do
-    if cell.fg[i] == obj then
-     table.remove(cell.fg, i)
+  local cell = world.grid[gx][gy][level]
+  for i = 1, #cell do
+    if cell[i] == obj then
+     table.remove(cell, i)
      break
     end
   end

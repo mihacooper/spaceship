@@ -87,20 +87,15 @@ end
 function love.draw()
   love.graphics.push()
   love.graphics.scale(world.scale)
-  world.grid_map_curr_rect(
-    function(_, cell, left, top)
-      if cell ~= nil and cell.bg ~= nil then
-        draw_objects(cell.bg)
-      end
-    end, nil
-    )
-  world.grid_map_curr_rect(
-    function(_, cell, left, top)
-      if cell ~= nil and cell.fg ~= nil then
-        draw_objects(cell.fg)
-      end
-    end, nil
-  )
+  for lev = 1, DRAW_LAYERS do
+    world.grid_map_curr_rect(
+      function(_, cell, _, _, _)
+        if cell ~= nil then
+          draw_objects(cell)
+        end
+      end, lev, nil
+      )
+  end
   love.graphics.pop()
   love.graphics.print("FPS: "..tostring(love.timer.getFPS( )), 10, 10)
   love.graphics.print("POS: "

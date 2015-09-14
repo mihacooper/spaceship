@@ -22,6 +22,7 @@ function enemy_api.new(domain)
   enemy.attacking = false
   enemy.retreating = false
   enemy.shoot_timer = new_timer(0.1)
+  enemy.level = DRAW_LAYER_BOT
 
   function enemy:can_shoot()
     local mydir = lm.vecmk(self)

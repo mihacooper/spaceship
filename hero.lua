@@ -12,7 +12,8 @@ local hero =
 {
 	x = 0, y = 0, angle = 0., image = nil,
   speed = 0., objtype = OBJ_TYPE_HERO,
-  shoot_timer = new_timer(0.1)
+  shoot_timer = new_timer(0.1),
+  level = DRAW_LAYER_USER
 }
 
 local hero_events = {}
@@ -45,14 +46,14 @@ function hero_events.update(par)
       domainer.get_domain():put(bull)
     end
   elseif par.msg == nil then
-    world.rm_fg(hero)
+    world.rm(hero, hero.level)
     hero.x = hero.x + math.cos(hero.angle) * hero.speed * par.dt
     hero.y = hero.y + math.sin(hero.angle) * hero.speed * par.dt
     world.camera.x = hero.x - WINDOW_WIDTH / 2
     world.camera.y = hero.y - WINDOW_HEIGHT / 2
     world.center.x = hero.x
     world.center.y = hero.y
-    world.put_fg(hero)
+    world.put(hero, hero.level)
   end
 end
 
