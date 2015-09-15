@@ -1,16 +1,16 @@
 require "utils"
 world = require "world" 
-resources = require "resources/resources" 
 weapon = require "weapon"
 domainer = require "domain"
+require "resources/resources" 
 
-local MAX_SPEED = 1200
-local SPEED_STEP = 15
-local ANGLE_SPEED = math.pi 
+local MAX_SPEED = 1000.
+local SPEED_STEP = 10.
+local ANGLE_SPEED = math.pi / 1.5 
 
 local hero = 
 {
-	x = 0, y = 0, angle = 0., image = nil,
+	x = 0, y = 0, angle = -math.pi / 2., image = IMAGE_SHIP,
   speed = 0., objtype = OBJ_TYPE_HERO,
   shoot_timer = new_timer(0.1),
   level = DRAW_LAYER_USER
@@ -19,7 +19,6 @@ local hero =
 local hero_events = {}
 
 function hero_events.load()
-  hero.image = ship
 end
 
 function hero_events.update(par)
@@ -46,14 +45,13 @@ function hero_events.update(par)
       domainer.get_domain():put(bull)
     end
   elseif par.msg == nil then
-    world.rm(hero, hero.level)
+    world.rm(hero)
     hero.x = hero.x + math.cos(hero.angle) * hero.speed * par.dt
     hero.y = hero.y + math.sin(hero.angle) * hero.speed * par.dt
-    world.camera.x = hero.x - WINDOW_WIDTH / 2
-    world.camera.y = hero.y - WINDOW_HEIGHT / 2
-    world.center.x = hero.x
-    world.center.y = hero.y
-    world.put(hero, hero.level)
+    world.camera.x = hero.x
+    world.camera.y = hero.y
+    world.camera.angle = -(hero.angle + math.pi / 2.)
+    world.put(hero)
   end
 end
 

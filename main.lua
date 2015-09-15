@@ -61,8 +61,8 @@ function draw_objects(ct)
       local offx = offset_x(obj.image)
       local offy = offset_y(obj.image)
       love.graphics.draw(obj.image, 
-        obj.x  - world.camera.x,
-        obj.y  - world.camera.y,
+        obj.x  - world.camera.x + WINDOW_WIDTH / 2,
+        obj.y  - world.camera.y + WINDOW_HEIGHT / 2,
         obj.angle + math.pi / 2, 1, 1, offx, offy)
     end
   end
@@ -85,20 +85,29 @@ function love.mousepressed( x, y, mb )
 end
 
 function love.draw()
-  love.graphics.push()
-  love.graphics.scale(world.scale)
-  for lev = 1, DRAW_LAYERS do
-    world.grid_map_curr_rect(
-      function(_, cell, _, _, _)
-        if cell ~= nil then
-          draw_objects(cell)
-        end
-      end, lev, nil
-      )
+  for lev = 1, DRAW_LAYERS_COUNT do
+    local bgrid = false
+    if find(grid_layers, lev) then
+      bgrid = true
+      love.graphics.push()
+      love.graphics.scale(world.scale)
+      love.graphics.translate(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+      love.graphics.rotate(world.camera.angle)
+      love.graphics.translate(-WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2)
+    end
+    events.perform("predrawing", lev)
+    if bgrid then
+      world.grid_map_curr_rect(
+        function(_, cell, _, _, _)
+          if cell ~= nil then
+            draw_objects(cell)
+          end
+        end, lev, nil
+        )
+    end
+    events.perform("postdrawing", lev)
+    if bgrid then
+      love.graphics.pop()
+    end
   end
-  love.graphics.pop()
-  love.graphics.print("FPS: "..tostring(love.timer.getFPS( )), 10, 10)
-  love.graphics.print("POS: "
-      ..tostring(math.floor(world.center.x / world.cell_width)).."x"
-      ..tostring(math.floor(world.center.y / world.cell_height)), 10, 25)
 end

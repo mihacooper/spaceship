@@ -72,7 +72,7 @@ local function check_domain(i, j)
 end
 
 local function domain_map_curr_rect(f, p)
-  local left, top = domain_location(world.center.x, world.center.y)
+  local left, top = domain_location(world.camera.x, world.camera.y)
   local right = left + 2
   local bottom = top + 2
   left = left - 2
@@ -90,13 +90,13 @@ local function domain_updater(dt, cell)
   local i, count = 1, #cell.objects
   while i <= count do
     local en = cell.objects[i]
-    world.rm(en, en.level)
+    world.rm(en)
     if not en:update(cell, dt) then
       table.remove(cell.objects, i)
       count = count - 1
     else
       i = i + 1
-      world.put(en, en.level)
+      world.put(en)
     end
   end
 end
@@ -106,7 +106,7 @@ function domain_api.update(par)
 end
 
 function domain_api.get_domain(x, y)
-  local dx, dy = domain_location(world.center.x, world.center.y)
+  local dx, dy = domain_location(world.camera.x, world.camera.y)
   check_domain(dx, dy)
   return domain[dx][dy] 
 end

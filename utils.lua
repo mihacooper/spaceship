@@ -10,3 +10,12 @@ function new_timer(time)
   end
   return timer
 end
+
+function find(table, value)
+  for k, v in pairs(table) do
+    if v == value then
+      return k
+    end
+  end
+  return nil
+end

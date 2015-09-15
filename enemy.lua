@@ -9,12 +9,17 @@ bot = bot_api.new()
 
 local ATTACK_RADIUS = function(domain_rad) return domain_rad / 2 end 
 
+local ENEMY_USUAL_SPEED = 200
+local ENEMY_ATACK_SPEED = 350
+local ENEMY_USUAL_FLEX = 0.8
+local ENEMY_ATACK_FLEX = 0.28
+
 function enemy_api.new(domain)
   local enemy = bot_api.new()
   enemy.x, enemy.y = domain:center()
-  enemy.image = image_enemy
+  enemy.image = IMAGE_ENEMY
   enemy.angle = math.random() * math.pi * lm.rand_sign()
-  enemy.max_speed = 300
+  enemy.max_speed = ENEMY_USUAL_SPEED
   enemy.speed = enemy.max_speed
   enemy.max_angsp = math.pi / (math.random() * 2 + 1)
   enemy:move_to(domain:rand_pnt())
@@ -26,7 +31,7 @@ function enemy_api.new(domain)
 
   function enemy:can_shoot()
     local mydir = lm.vecmk(self)
-    local enemdir = lm.vecsub(world.center, self)
+    local enemdir = lm.vecsub(world.camera, self)
     if math.abs(lm.vecscal(mydir, enemdir) / (lm.vecmod(enemdir) * lm.vecmod(mydir)) - 1) < 0.1 then
       return true
     end
@@ -34,7 +39,7 @@ function enemy_api.new(domain)
   end
 
   function enemy:update(domain, dt)
-    local waytotarg = lm.vecmod(lm.vecsub(world.center, self))
+    local waytotarg = lm.vecmod(lm.vecsub(world.camera, self))
     if self.attacking then
       if self:can_shoot() then
         if self.shoot_timer:age(dt) then
@@ -53,27 +58,27 @@ function enemy_api.new(domain)
         if waytotarg > domain:radius() then
           self.attacking = false
           self.retreating = true
-          self.speed = 300
-          self.flexway = 1.
+          self.speed = ENEMY_USUAL_SPEED
+          self.flexway = ENEMY_USUAL_FLEX
           self.agresway = false
         elseif waytotarg < 150 then
           local ang = self.angle + (math.random() * (math.pi / 4) + math.pi / 6) * lm.rand_sign()
           local subrad = 300
           local nx, ny = subrad * math.cos(ang), subrad * math.sin(ang)
           self.retreating = true
-          self:move_to(world.center.x + nx, world.center.y + ny)
+          self:move_to(world.camera.x + nx, world.camera.y + ny)
         else
-          self:move_to(world.center.x, world.center.y)
+          self:move_to(world.camera.x, world.camera.y)
         end
         bot.update(self, dt)
       end
     else
       if waytotarg < domain:radius() / 2 then
           self.attacking = true
-          self.speed = 500
-          self.flexway = 0.25
-          self.agresway = true
-          self:move_to(world.center.x, world.center.y)
+          self.speed = ENEMY_ATACK_SPEED
+          self.flexway = ENEMY_ATACK_FLEX
+          --self.agresway = true
+          self:move_to(world.camera.x, world.camera.y)
       elseif bot.update(self, dt) then
         if self.to_center then
           self:move_to(domain:rand_pnt())
