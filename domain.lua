@@ -6,13 +6,21 @@ enemy_api = require "enemy"
 
 local domain_api = {}
 local domain = {}
-local domain_rad = 50
+local domain_rad = 30
 local domain_diam = domain_rad * 2
 
 local function domain_location(x, y)
   local mx, my = world.grid_location(x, y)
   return math.floor(mx / domain_diam),
     math.floor(my / domain_diam)
+end
+
+function domain_api.radius()
+  return domain_rad * world.cell_width
+end
+
+function domain_api.diameter()
+  return domain_diam * world.cell_width
 end
 
 local function new_domain(i, j)
@@ -71,7 +79,7 @@ local function check_domain(i, j)
     end
 end
 
-local function domain_map_curr_rect(f, p)
+function domain_api.domain_map_curr_rect(f, p)
   local left, top = domain_location(world.camera.x, world.camera.y)
   local right = left + 2
   local bottom = top + 2
@@ -102,13 +110,19 @@ local function domain_updater(dt, cell)
 end
 
 function domain_api.update(par)
-  domain_map_curr_rect(domain_updater, par.dt)
+  domain_api.domain_map_curr_rect(domain_updater, par.dt)
 end
 
 function domain_api.get_domain(x, y)
   local dx, dy = domain_location(world.camera.x, world.camera.y)
   check_domain(dx, dy)
   return domain[dx][dy] 
+end
+
+function domain_api.get_domain_neigh(x, y, cx, cy)
+  local dx, dy = domain_location(world.camera.x, world.camera.y)
+  check_domain(dx + cx, dy + cy)
+  return domain[dx + cx][dy + cy] 
 end
 
 return domain_api
