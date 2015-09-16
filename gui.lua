@@ -1,11 +1,10 @@
 world = require "world"
 domain = require "domain"
 lm = require "locmath"
+hero_api = require "hero"
 
 local compass_api = {}
   
---local compass = { x = 0, y = 0, angle = 0., image = IMAGE_COMPASS, level = DRAW_GUI_LAYER}
-
 local radar_center = {x = IMAGE_COMPASS:getWidth() / 2, y = IMAGE_COMPASS:getWidth() / 2}
 
 local function draw_radar()
@@ -24,7 +23,7 @@ local function draw_radar()
     domain.domain_map_curr_rect(
       function(_, dmn)
         for _, obj in pairs(dmn.objects) do
-          if obj.objtype == OBJ_TYPE_BOT then
+          if obj.type == OBJ_TYPE_BOT then
             local dir = lm.vecsub(obj, world.camera)
             local coeff = lm.vecmod(dir) / (domain.radius() / 2)
             if coeff <= 1. then
@@ -39,8 +38,23 @@ local function draw_radar()
             end
           end
         end
-      end
+      end, nil, 1
     )
+end
+
+local function draw_hero_status()
+  local hero = hero_api.get_hero()
+  local coeff = hero.health / hero.maxhealth
+  
+  local x, y = ORIGIN_WINDOW_WIDTH - 110, 10
+  local linew, lineh = 100, 10
+  local r,g,b,a = love.graphics.getColor()
+  local spliter = math.floor(linew * coeff)
+  love.graphics.setColor(0, 255, 0)
+  love.graphics.rectangle("fill", x, y, spliter, lineh)
+  love.graphics.setColor(255, 0, 0)
+  love.graphics.rectangle("fill", x + spliter, y, linew - spliter, lineh)
+  love.graphics.setColor(r, g, b, a)
 end
 
 local function draw_compass()
@@ -64,6 +78,7 @@ function compass_api.postdraw(lev)
     draw_radar()
     draw_compass()
     draw_info()
+    draw_hero_status()
   end
 end
 

@@ -47,24 +47,9 @@ function love.update(dt)
   end
 end
  
-function offset_x(image)
-	return image:getWidth() / 2
-end
- 
-function offset_y(image)
-	return image:getHeight() / 2
-end
-
 function draw_objects(ct)
   for _, obj in pairs(ct) do
-    if obj.image ~= nil then
-      local offx = offset_x(obj.image)
-      local offy = offset_y(obj.image)
-      love.graphics.draw(obj.image, 
-        obj.x  - world.camera.x + WINDOW_WIDTH / 2,
-        obj.y  - world.camera.y + WINDOW_HEIGHT / 2,
-        obj.angle + math.pi / 2, 1, 1, offx, offy)
-    end
+    obj:draw()
   end
 end
 
@@ -87,7 +72,7 @@ end
 function love.draw()
   for lev = 1, DRAW_LAYERS_COUNT do
     local bgrid = false
-    if find(grid_layers, lev) then
+    if tfind(grid_layers, lev) then
       bgrid = true
       love.graphics.push()
       love.graphics.scale(world.scale)

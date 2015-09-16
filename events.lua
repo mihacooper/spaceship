@@ -4,6 +4,7 @@ domain = require "domain"
 enemy = require "enemy"
 gui = require "gui"
 background = require "background"
+log = require "loger"
 
 local event_handlers = 
 {
@@ -52,7 +53,7 @@ local event_handlers =
     {enemy.domain_init, {}},
   },
   predrawing = {background.predraw},
-  postdrawing = {gui.postdraw},
+  postdrawing = {gui.postdraw, log.draw},
 }
 function event_handlers.perform(event, par)
   if event_handlers[event] == nil then

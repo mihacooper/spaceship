@@ -1,14 +1,13 @@
 lm = require "locmath"
+object = require "object"
 
 local bot_api = {}
 
+local base_obj = object.new()
+
 function bot_api.new()
-  local bot = {}
-  bot.x = 0
-  bot.y = 0
-  bot.angle = 0
+  local bot = object.new()
   bot.speed = 0
-  bot.image = nil
   bot.max_speed = 0
   bot.max_angsp = 0
   
@@ -20,7 +19,7 @@ function bot_api.new()
   bot.total_time = 0
   bot.flexway = 1
   bot.agresway = false
-  bot.objtype = OBJ_TYPE_BOT
+  bot.moving = false
     
     function bot:move_to(x, y)
       self.dst_pnt.x = x
@@ -38,10 +37,18 @@ function bot_api.new()
       self.mid2_pnt.y = mid2.y
       self.total_time = way_length / (self.speed)
       self.move_t = 0.
+      self.moving = true
     end
-    function bot:update(dt)
+    function bot:update(domain, dt)
+      if not base_obj.update(self, domain, dt) then
+        return false
+      end
+      if self.moving == false then
+        return true
+      end
       local dst_dir = lm.vecsub(self.dst_pnt, self)
       if lm.vecmod(dst_dir) <= self.speed * dt then
+        self.moving = false
         return true
       end
       local step = dt / self.total_time
@@ -103,7 +110,7 @@ function bot_api.new()
       if lm.vecmod(movedir) > 0 then
         lm.vectoang(self, movedir)
       end
-      return false
+      return true
     end
   return bot
 end

@@ -11,7 +11,7 @@ function new_timer(time)
   return timer
 end
 
-function find(table, value)
+function tfind(table, value)
   for k, v in pairs(table) do
     if v == value then
       return k
@@ -19,3 +19,29 @@ function find(table, value)
   end
   return nil
 end
+
+function tcombinevec(left, right)
+  local res = {}
+  for _, v in pairs(left) do
+    table.insert(res, v)
+  end
+  for _, v in pairs(right) do
+    table.insert(res, v)
+  end
+  return res
+end
+
+function taddvec(left, right)
+  for _, v in pairs(right) do
+    table.insert(left, v)
+  end
+end
+
+function tcombinevecs(vects)
+  local res = {}
+  for _, vec in pairs(vects) do
+    taddvec(res, vec)
+  end
+  return res
+end
+

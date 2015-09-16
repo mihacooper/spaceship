@@ -3,6 +3,7 @@ config = require "config"
 resources = require "resources/resources" 
 lm = require "locmath"
 enemy_api = require "enemy"
+log = require "loger"
 
 local domain_api = {}
 local domain = {}
@@ -76,15 +77,17 @@ local function check_domain(i, j)
         ev[2].domain = domain[i][j]
         ev[1](ev[2])
       end
+      log.send("Domain creation: " .. tostring(i) ..", " .. tostring(j), LOG_BASE)
     end
 end
 
-function domain_api.domain_map_curr_rect(f, p)
+function domain_api.domain_map_curr_rect(f, p, rad)
   local left, top = domain_location(world.camera.x, world.camera.y)
-  local right = left + 2
-  local bottom = top + 2
-  left = left - 2
-  top = top - 2
+  local radius = rad or 2
+  local right = left + radius
+  local bottom = top + radius
+  left = left - radius
+  top = top - radius
 
   for i = left,right do
     for j= top,bottom do
@@ -114,7 +117,7 @@ function domain_api.update(par)
 end
 
 function domain_api.get_domain(x, y)
-  local dx, dy = domain_location(world.camera.x, world.camera.y)
+  local dx, dy = domain_location(x or world.camera.x, y or world.camera.y)
   check_domain(dx, dy)
   return domain[dx][dy] 
 end

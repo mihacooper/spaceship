@@ -28,6 +28,7 @@ function enemy_api.new(domain)
   enemy.retreating = false
   enemy.shoot_timer = new_timer(0.1)
   enemy.level = DRAW_LAYER_BOT
+  enemy.type = OBJ_TYPE_BOT
 
   function enemy:can_shoot()
     local mydir = lm.vecmk(self)
@@ -47,11 +48,16 @@ function enemy_api.new(domain)
           bull.x = self.x
           bull.y = self.y
           bull.angle = self.angle
+          bull.target_type = OBJ_TYPE_HERO
+          bull.damage = 1
           domain:put(bull)
         end
       end
       if self.retreating then
-        if bot.update(self, dt) then
+        if not bot.update(self, domain, dt) then
+          return false
+        end
+        if self.moving == false then
           self.retreating = false
         end
       else
@@ -70,7 +76,9 @@ function enemy_api.new(domain)
         else
           self:move_to(world.camera.x, world.camera.y)
         end
-        bot.update(self, dt)
+        if not bot.update(self, domain, dt) then
+          return false
+        end
       end
     else
       if waytotarg < domain:radius() / 2 then
@@ -79,13 +87,18 @@ function enemy_api.new(domain)
           self.flexway = ENEMY_ATACK_FLEX
           --self.agresway = true
           self:move_to(world.camera.x, world.camera.y)
-      elseif bot.update(self, dt) then
-        if self.to_center then
-          self:move_to(domain:rand_pnt())
-          self.to_center = false
-        else
-          self:move_to(domain:center())
-          self.to_center = true
+      else
+        if not bot.update(self, domain, dt) then
+          return false
+        end
+        if self.moving == false then
+          if self.to_center then
+            self:move_to(domain:rand_pnt())
+            self.to_center = false
+          else
+            self:move_to(domain:center())
+            self.to_center = true
+          end
         end
       end
     end

@@ -2,8 +2,9 @@ world = require "world"
 
 local background_api = {}
   
-local bgcell_width = world.cell_width * 4
-local bgcell_height = world.cell_height * 4
+local BG_CELL_COEFF = 10
+local bgcell_width = world.cell_width * BG_CELL_COEFF
+local bgcell_height = world.cell_height * BG_CELL_COEFF
  
 local bg_grid = {}
 local function newRandomStar(cx, cy, w, h)
@@ -25,7 +26,7 @@ local function check_cell(i, j)
     end
     if bg_grid[i][j] == nil then
       bg_grid[i][j] = {}
-      local num = math.random(10) + 20
+      local num = math.random(40) + 80
       for s = 1, num do
         bg_grid[i][j][s] = newRandomStar(i * bgcell_width, j * bgcell_height, bgcell_width, bgcell_height)
       end
@@ -39,10 +40,10 @@ end
 function background_api.predraw(lev)
   if lev == DRAW_LAYER_BG then
     local left, right, top, bottom = world.screen_grid_rect()
-    left = math.floor(left / 4) 
-    right = math.ceil(right / 4) 
-    top = math.floor(top / 4)
-    bottom = math.ceil(bottom / 4)
+    left = math.floor(left / BG_CELL_COEFF) 
+    right = math.ceil(right / BG_CELL_COEFF) 
+    top = math.floor(top / BG_CELL_COEFF)
+    bottom = math.ceil(bottom / BG_CELL_COEFF)
     for i = left, right do
       for j= top, bottom do
         local cell = check_cell(i, j)

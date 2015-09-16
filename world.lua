@@ -29,11 +29,17 @@ local function check_cell(i, j)
     if world.grid[i][j] == nil then
       world.grid[i][j] = {}
       for lev = 1, DRAW_LAYERS_COUNT do
-        if find(grid_layers, lev) then
+        if tfind(grid_layers, lev) then
           world.grid[i][j][lev] = {}
         end
       end
     end
+end
+
+function world.get_cell(x, y)
+  local gx, gy = world.grid_location(x, y)
+  check_cell(gx, gy)
+  return world.grid[gx][gy]
 end
 
 function world.screen_rect()
